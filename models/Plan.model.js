@@ -7,5 +7,5 @@ const PlanSchema = new Schema({
   totalIngredients: [String],
 });
 
-const PlanModel = model("shoppinglist", PlanSchema);
+const PlanModel = model("plan", PlanSchema);
 module.exports = PlanModel;

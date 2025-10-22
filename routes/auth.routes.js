@@ -2,6 +2,7 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const UserModel = require("../models/User.model");
+const ShoppingListModel = require("../models/ShoppingList.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 router.post("/signup", async (req, res) => {
@@ -47,9 +48,18 @@ router.post("/signup", async (req, res) => {
       email,
       password: hashedPassword,
     });
-    res
-      .status(201)
-      .json({ name: newUser.name, email: newUser.email, _id: newUser._id });
+    //when the User created a new Shopping List (isTotal = true) automaticaly created too
+    const newShoppingList = await ShoppingListModel.create({
+      userId: newUser._id,
+      items: [],
+      isTotal: true,
+    });
+    res.status(201).json({
+      name: newUser.name,
+      email: newUser.email,
+      _id: newUser._id,
+      totalShoppingListId: newShoppingList._id,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ errorMessage: "Internal Server Error" });

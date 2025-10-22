@@ -11,6 +11,15 @@ const { isAuthenticated } = require("./middleware/jwt.middleware");
 require("./config")(app);
 
 // 👇 Start handling routes here
+const recipeRoutes = require("./routes/recipe.routes");
+app.use("/api/recipes", recipeRoutes);
+
+const planRoutes = require("./routes/plan.routes");
+app.use("/api/plans", planRoutes);
+
+const shoppingListRoutes = require("./routes/shoppinglist.routes");
+app.use("/api/shoppingList", shoppingListRoutes);
+
 const indexRoutes = require("./routes/index.routes");
 app.use("/api", indexRoutes);
 
