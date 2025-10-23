@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const RecipeModel = require("../models/Recipe.model");
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 router.get("/", async (req, res) => {
   try {
@@ -21,7 +22,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     const newRecipe = await RecipeModel.create(req.body);
     res.status(201).json(newRecipe);
@@ -31,7 +32,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAuthenticated, async (req, res) => {
   try {
     const updatedRecipe = await RecipeModel.findByIdAndUpdate(
       req.params.id,
@@ -45,7 +46,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const deletedRecipe = await RecipeModel.findByIdAndDelete(req.params.id);
     res.status(200).json(deletedRecipe);

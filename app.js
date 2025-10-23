@@ -18,7 +18,7 @@ const planRoutes = require("./routes/plan.routes");
 app.use("/api/plans", planRoutes);
 
 const shoppingListRoutes = require("./routes/shoppinglist.routes");
-app.use("/api/shoppingList", shoppingListRoutes);
+app.use("/api/shopping-list", shoppingListRoutes);
 
 const indexRoutes = require("./routes/index.routes");
 app.use("/api", indexRoutes);

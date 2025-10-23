@@ -1,75 +1,53 @@
 const router = require("express").Router();
 const ShoppingListModel = require("../models/ShoppingList.model");
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 //total shopping list for the user dashboard (req.query.istotal = true)
-router.get("/:userId", async (req, res) => {
+router.get("/user/:userId", isAuthenticated, async (req, res) => {
   try {
-    const shoppingList = await PlanModel.find({
+    const shoppingList = await ShoppingListModel.findOne({
       userId: req.params.userId,
-    }).select("name recipes");
-    const userPlansFormated = userPlans.map((onePlan) => {
-      return {
-        _id: onePlan._id,
-        name: onePlan.name,
-        recipesNumber: onePlan.recipes.length,
-      };
-    });
-
-    res.status(200).json(userPlansFormated);
+      isTotal: true,
+    }).select("items");
+    res.status(200).json(shoppingList);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ errorMessage: "Failed to find user's meal plans." });
+    res
+      .status(500)
+      .json({ errorMessage: "Failed to find user's Total Shopping List." });
   }
 });
 
 //shopping list for particular user's meal plan
-router.get("/:id", async (req, res) => {
+router.get("/plan/:planId", isAuthenticated, async (req, res) => {
   try {
-    const thePlan = await PlanModel.findById(req.params.id).populate("recipes");
-    res.status(200).json(thePlan);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ errorMessage: "Failed to find a meal plan." });
-  }
-});
-
-router.post("/", async (req, res) => {
-  try {
-    const userNewPlan = await PlanModel.create(req.body);
-    res.status(201).json(userNewPlan);
+    const shoppingList = await ShoppingListModel.findOne({
+      planId: req.params.planId,
+      isTotal: false,
+    }).select("items");
+    res.status(200).json(shoppingList);
   } catch (error) {
     console.log(error);
     res
       .status(500)
-      .json({ errorMessage: "Failed to create a new user's meal plan." });
+      .json({ errorMessage: "Failed to find a meal plan's shopping list." });
   }
 });
 
-router.put("/:id", async (req, res) => {
+//update only items
+router.patch("/:id", isAuthenticated, async (req, res) => {
   try {
-    const updatedPlan = await PlanModel.findByIdAndUpdate(
+    const updatedShoppingList = await ShoppingListModel.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
-    res.status(200).json(updatedPlan);
+    res.status(200).json(updatedShoppingList);
   } catch (error) {
     console.log(error);
     res
       .status(500)
-      .json({ errorMessage: "Failed to update the user's meal plan." });
-  }
-});
-
-router.delete("/:id", async (req, res) => {
-  try {
-    const deletedUserPlan = await PlanModel.findByIdAndDelete(req.params.id);
-    res.status(200).json(deletedUserPlan);
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ errorMessage: "Failed to delete a user's meal plan." });
+      .json({ errorMessage: "Failed to update the shopping list." });
   }
 });
 

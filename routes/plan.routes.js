@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const PlanModel = require("../models/Plan.model");
 const ShoppingListModel = require("../models/ShoppingList.model");
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", isAuthenticated, async (req, res) => {
   try {
     const userPlans = await PlanModel.find({
       userId: req.params.userId,
@@ -22,7 +23,7 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", isAuthenticated, async (req, res) => {
   try {
     const thePlan = await PlanModel.findById(req.params.id).populate("recipes");
     res.status(200).json(thePlan);
@@ -32,7 +33,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     const userNewPlan = await PlanModel.create(req.body);
     //when a Plan created, a new Shopping List (isTotal = false) automaticaly created too and connectes to the Plan
@@ -58,7 +59,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAuthenticated, async (req, res) => {
   try {
     const updatedPlan = await PlanModel.findByIdAndUpdate(
       req.params.id,
@@ -74,7 +75,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const deletedUserPlan = await PlanModel.findByIdAndDelete(req.params.id);
     res.status(200).json(deletedUserPlan);
