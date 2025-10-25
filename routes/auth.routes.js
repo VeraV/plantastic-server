@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    const foundUser = await UserModel.findOne({ email });Re
+    const foundUser = await UserModel.findOne({ email });
 
     if (!foundUser) {
       res
