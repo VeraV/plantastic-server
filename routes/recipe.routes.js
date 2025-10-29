@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const RecipeModel = require("../models/Recipe.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
+const uploader = require("../middleware/cloudinary.config");
 
 router.get("/", async (req, res) => {
   try {
@@ -22,29 +23,40 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", isAuthenticated, async (req, res) => {
-  try {
-    const newRecipe = await RecipeModel.create(req.body);
-    res.status(201).json(newRecipe);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ errorMessage: "Failed to create a new recipe." });
+router.post(
+  "/",
+  [isAuthenticated, uploader.single("imageUrl")],
+  async (req, res) => {
+    try {
+      const newRecipe = await RecipeModel.create({
+        ...req.body,
+        image: req.file?.path,
+      });
+      res.status(201).json(newRecipe);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ errorMessage: "Failed to create a new recipe." });
+    }
   }
-});
+);
 
-router.put("/:id", isAuthenticated, async (req, res) => {
-  try {
-    const updatedRecipe = await RecipeModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.status(200).json(updatedRecipe);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ errorMessage: "Failed to update the recipe." });
+router.put(
+  "/:id",
+  [isAuthenticated, uploader.single("imageUrl")],
+  async (req, res) => {
+    try {
+      const updatedRecipe = await RecipeModel.findByIdAndUpdate(
+        req.params.id,
+        { ...req.body, image: req.file?.path },
+        { new: true }
+      );
+      res.status(200).json(updatedRecipe);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ errorMessage: "Failed to update the recipe." });
+    }
   }
-});
+);
 
 router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
