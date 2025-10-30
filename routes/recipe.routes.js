@@ -30,6 +30,7 @@ router.post(
     try {
       const newRecipe = await RecipeModel.create({
         ...req.body,
+        ingredients: JSON.parse(req.body.ingredients),
         image: req.file?.path,
       });
       res.status(201).json(newRecipe);
@@ -47,7 +48,11 @@ router.put(
     try {
       const updatedRecipe = await RecipeModel.findByIdAndUpdate(
         req.params.id,
-        { ...req.body, image: req.file?.path },
+        {
+          ...req.body,
+          image: req.file?.path,
+          ingredients: JSON.parse(req.body.ingredients),
+        },
         { new: true }
       );
       res.status(200).json(updatedRecipe);
