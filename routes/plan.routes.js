@@ -36,21 +36,17 @@ router.get("/:id", isAuthenticated, async (req, res) => {
 router.post("/", isAuthenticated, async (req, res) => {
   try {
     const userNewPlan = await PlanModel.create(req.body);
-    //when a Plan created, a new Shopping List (isTotal = false) automaticaly created too and connectes to the Plan
+    // Rule: every plan has its own shopping list (isTotal: false).
+    // Created together with the plan so the client can open it right away.
     const newShoppingList = await ShoppingListModel.create({
       userId: userNewPlan.userId,
       items: [],
       planId: userNewPlan._id,
     });
     res.status(201).json({
-      name: userNewPlan.name,
-      userId: userNewPlan.userId,
-      recipes: [],
-      totalIngredients: [],
+      ...userNewPlan.toObject(),
       shoppingListId: newShoppingList._id,
     });
-
-    //res.status(201).json(userNewPlan);
   } catch (error) {
     console.log(error);
     res
@@ -64,7 +60,7 @@ router.put("/:id", isAuthenticated, async (req, res) => {
     const updatedPlan = await PlanModel.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true },
     );
     res.status(200).json(updatedPlan);
   } catch (error) {
