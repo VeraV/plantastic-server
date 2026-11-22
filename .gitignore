@@ -21,3 +21,7 @@ ehthumbs.db
 
 # VS Code
 .vscode/*
+
+# Postman
+.postman/
+postman/
