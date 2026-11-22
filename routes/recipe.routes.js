@@ -3,6 +3,16 @@ const RecipeModel = require("../models/Recipe.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 const uploader = require("../middleware/cloudinary.config");
 
+function buildRecipeData(body, file) {
+  // Recipe comes as multipart/form-data (because of image upload),
+  // so arrays arrive as JSON strings and the image as req.file
+  return {
+    ...body,
+    ingredients: JSON.parse(body.ingredients),
+    image: file?.path,
+  };
+}
+
 router.get("/", async (req, res) => {
   try {
     const recipes = await RecipeModel.find();
@@ -28,17 +38,15 @@ router.post(
   [isAuthenticated, uploader.single("imageUrl")],
   async (req, res) => {
     try {
-      const newRecipe = await RecipeModel.create({
-        ...req.body,
-        ingredients: JSON.parse(req.body.ingredients),
-        image: req.file?.path,
-      });
+      const newRecipe = await RecipeModel.create(
+        buildRecipeData(req.body, req.file),
+      );
       res.status(201).json(newRecipe);
     } catch (error) {
       console.log(error);
       res.status(500).json({ errorMessage: "Failed to create a new recipe." });
     }
-  }
+  },
 );
 
 router.put(
@@ -48,19 +56,15 @@ router.put(
     try {
       const updatedRecipe = await RecipeModel.findByIdAndUpdate(
         req.params.id,
-        {
-          ...req.body,
-          image: req.file?.path,
-          ingredients: JSON.parse(req.body.ingredients),
-        },
-        { new: true }
+        buildRecipeData(req.body, req.file),
+        { new: true },
       );
       res.status(200).json(updatedRecipe);
     } catch (error) {
       console.log(error);
       res.status(500).json({ errorMessage: "Failed to update the recipe." });
     }
-  }
+  },
 );
 
 router.delete("/:id", isAuthenticated, async (req, res) => {
